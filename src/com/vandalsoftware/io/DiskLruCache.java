@@ -87,6 +87,7 @@ public final class DiskLruCache implements Closeable {
     private static final String DIRTY = "DIRTY";
     private static final String REMOVE = "REMOVE";
     private static final String READ = "READ";
+    private static final int REDUNDANT_OP_COMPACT_THRESHOLD = 2000;
 
     /*
      * This cache uses a journal file named "journal". A typical journal file
@@ -155,7 +156,6 @@ public final class DiskLruCache implements Closeable {
                 trimToSize();
                 if (journalRebuildRequired()) {
                     rebuildJournal();
-                    redundantOpCount = 0;
                 }
             }
             return null;
@@ -193,9 +193,10 @@ public final class DiskLruCache implements Closeable {
         DiskLruCache cache = new DiskLruCache(directory, appVersion, valueCount, maxSize);
         if (cache.journalFile.exists()) {
             try {
-                cache.readJournal();
+                final int journalEntries = cache.readJournal();
                 cache.processJournal();
                 cache.journalWriter = new BufferedWriter(new FileWriter(cache.journalFile, true));
+                cache.redundantOpCount = journalEntries - cache.lruEntries.size();
                 return cache;
             } catch (IOException journalIsCorrupt) {
                 Log.w("DiskLruCache", directory + " is corrupt: "
@@ -211,7 +212,13 @@ public final class DiskLruCache implements Closeable {
         return cache;
     }
 
-    private void readJournal() throws IOException {
+    /**
+     * Reads the journal file.
+     *
+     * @return number of journal entries
+     * @throws IOException
+     */
+    private int readJournal() throws IOException {
         InputStream in = new BufferedInputStream(new FileInputStream(journalFile));
         try {
             String magic = Streams.readAsciiLine(in);
@@ -228,13 +235,16 @@ public final class DiskLruCache implements Closeable {
                         + magic + ", " + version + ", " + valueCountString + ", " + blank + "]");
             }
 
+            int entries = 0;
             while (true) {
                 try {
                     readJournalLine(Streams.readAsciiLine(in));
+                    entries += 1;
                 } catch (EOFException endOfJournal) {
                     break;
                 }
             }
+            return entries;
         } finally {
             IoUtils.closeQuietly(in);
         }
@@ -332,6 +342,7 @@ public final class DiskLruCache implements Closeable {
         writer.close();
         journalFileTmp.renameTo(journalFile);
         journalWriter = new BufferedWriter(new FileWriter(journalFile, true));
+        redundantOpCount = 0;
     }
 
     private static boolean deleteIfExists(File file) throws IOException {
@@ -373,7 +384,7 @@ public final class DiskLruCache implements Closeable {
             return null;
         }
 
-        redundantOpCount++;
+        redundantOpCount += 1;
         journalWriter.append(READ + ' ' + key + '\n');
         if (journalRebuildRequired()) {
             executorService.submit(cleanupCallable);
@@ -459,7 +470,7 @@ public final class DiskLruCache implements Closeable {
             }
         }
 
-        redundantOpCount++;
+        redundantOpCount += 1;
         entry.currentEditor = null;
         if (entry.readable | success) {
             entry.readable = true;
@@ -479,7 +490,6 @@ public final class DiskLruCache implements Closeable {
      * 2000 ops.
      */
     private boolean journalRebuildRequired() {
-        final int REDUNDANT_OP_COMPACT_THRESHOLD = 2000;
         return redundantOpCount >= REDUNDANT_OP_COMPACT_THRESHOLD
                 && redundantOpCount >= lruEntries.size();
     }
@@ -507,7 +517,7 @@ public final class DiskLruCache implements Closeable {
             entry.lengths[i] = 0;
         }
 
-        redundantOpCount++;
+        redundantOpCount += 1;
         journalWriter.append(REMOVE + ' ' + key + '\n');
         lruEntries.remove(key);
 
