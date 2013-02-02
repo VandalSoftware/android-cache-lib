@@ -173,7 +173,7 @@ public final class DiskLruCache implements Closeable {
      * Opens the cache in {@code directory}, creating a cache if none exists there.
      *
      * @param directory  a writable directory
-     * @param appVersion
+     * @param appVersion application-specific version
      * @param valueCount the number of values per cache entry. Must be positive.
      * @param maxSize    the maximum number of bytes this cache should use to store
      * @throws IOException if reading or writing the cache directory fails
@@ -211,11 +211,7 @@ public final class DiskLruCache implements Closeable {
     }
 
     private static boolean deleteIfExists(File file) throws IOException {
-        if (file.exists()) {
-            return file.delete();
-        } else {
-            return false;
-        }
+        return file.exists() && file.delete();
     }
 
     private static String inputStreamToString(InputStream in) throws IOException {
@@ -387,7 +383,7 @@ public final class DiskLruCache implements Closeable {
         }
 
         redundantOpCount += 1;
-        journalWriter.append(READ + ' ' + key + '\n');
+        journalWriter.append(READ).append(' ').append(key).append('\n');
         if (journalRebuildRequired()) {
             executorService.submit(cleanupCallable);
         }
@@ -520,7 +516,7 @@ public final class DiskLruCache implements Closeable {
         }
 
         redundantOpCount += 1;
-        journalWriter.append(REMOVE + ' ' + key + '\n');
+        journalWriter.append(REMOVE).append(' ').append(key).append('\n');
         lruEntries.remove(key);
 
         if (journalRebuildRequired()) {

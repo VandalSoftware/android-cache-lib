@@ -138,10 +138,12 @@ public final class Streams {
         }
     }
 
-    public static void skipAll(InputStream in) throws IOException {
+    public static int skipAll(InputStream in) throws IOException {
+        int skipped = 0;
         do {
-            in.skip(Long.MAX_VALUE);
+            skipped += in.skip(Long.MAX_VALUE);
         } while (in.read() != -1);
+        return skipped;
     }
 
     /**
