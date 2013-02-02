@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class Streams {

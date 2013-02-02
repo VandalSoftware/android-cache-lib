@@ -128,19 +128,14 @@ public final class DiskLruCache implements Closeable {
      * "journal.tmp" will be used during compaction; that file should be deleted if
      * it exists when the cache is opened.
      */
-
     private final File directory;
     private final File journalFile;
     private final File journalFileTmp;
     private final int appVersion;
     private final long maxSize;
     private final int valueCount;
-    private long size = 0;
-    private Writer journalWriter;
     private final LinkedHashMap<String, Entry> lruEntries
             = new LinkedHashMap<String, Entry>(0, 0.75f, true);
-    private int redundantOpCount;
-
     /**
      * This cache uses a single background thread to evict entries.
      */
@@ -161,6 +156,9 @@ public final class DiskLruCache implements Closeable {
             return null;
         }
     };
+    private long size = 0;
+    private Writer journalWriter;
+    private int redundantOpCount;
 
     private DiskLruCache(File directory, int appVersion, int valueCount, long maxSize) {
         this.directory = directory;
@@ -210,6 +208,18 @@ public final class DiskLruCache implements Closeable {
         cache = new DiskLruCache(directory, appVersion, valueCount, maxSize);
         cache.rebuildJournal();
         return cache;
+    }
+
+    private static boolean deleteIfExists(File file) throws IOException {
+        if (file.exists()) {
+            return file.delete();
+        } else {
+            return false;
+        }
+    }
+
+    private static String inputStreamToString(InputStream in) throws IOException {
+        return Streams.readFully(new InputStreamReader(in, IoUtils.UTF_8));
     }
 
     /**
@@ -343,14 +353,6 @@ public final class DiskLruCache implements Closeable {
         journalFileTmp.renameTo(journalFile);
         journalWriter = new BufferedWriter(new FileWriter(journalFile, true));
         redundantOpCount = 0;
-    }
-
-    private static boolean deleteIfExists(File file) throws IOException {
-        if (file.exists()) {
-            return file.delete();
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -590,10 +592,6 @@ public final class DiskLruCache implements Closeable {
         }
     }
 
-    private static String inputStreamToString(InputStream in) throws IOException {
-        return Streams.readFully(new InputStreamReader(in, IoUtils.UTF_8));
-    }
-
     /**
      * A snapshot of the values for an entry.
      */
@@ -755,17 +753,14 @@ public final class DiskLruCache implements Closeable {
 
     private final class Entry {
         private final String key;
-
         /**
          * Lengths of this entry's files.
          */
         private final long[] lengths;
-
         /**
          * True if this entry has ever been published
          */
         private boolean readable;
-
         /**
          * The ongoing edit or null if this entry is not being edited.
          */

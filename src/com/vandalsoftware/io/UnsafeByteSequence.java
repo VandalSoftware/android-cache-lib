@@ -19,12 +19,12 @@ package com.vandalsoftware.io;
 import java.io.UnsupportedEncodingException;
 
 /**
- * A cheaper ByteArrayOutputStream for internal use. This class is unsynchronized,
- * and returns its internal array if it's the right size. This makes String.getBytes("UTF-8")
- * 10x faster than the baseline non-fast-path implementation instead of 8x faster when using
- * ByteArrayOutputStream. When GC and uncontended synchronization become cheap, we should be
- * able to get rid of this class. In the meantime, if you need to add further API, please try
- * to keep it plug-compatible with ByteArrayOutputStream with an eye to future obsolescence.
+ * A cheaper ByteArrayOutputStream for internal use. This class is unsynchronized, and returns its
+ * internal array if it's the right size. This makes String.getBytes("UTF-8") 10x faster than the
+ * baseline non-fast-path implementation instead of 8x faster when using ByteArrayOutputStream. When
+ * GC and uncontended synchronization become cheap, we should be able to get rid of this class. In
+ * the meantime, if you need to add further API, please try to keep it plug-compatible with
+ * ByteArrayOutputStream with an eye to future obsolescence.
  */
 public class UnsafeByteSequence {
     private byte[] bytes;
@@ -39,8 +39,8 @@ public class UnsafeByteSequence {
     }
 
     /**
-     * Moves the write pointer back to the beginning of the sequence,
-     * but without resizing or reallocating the buffer.
+     * Moves the write pointer back to the beginning of the sequence, but without resizing or
+     * reallocating the buffer.
      */
     public void rewind() {
         count = 0;
