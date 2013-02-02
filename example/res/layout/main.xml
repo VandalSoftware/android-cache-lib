@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:padding="10dp"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+    <EditText android:id="@+id/key"
+              android:hint="@string/key_hint"
+              android:singleLine="true"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="5dp"/>
+    <EditText android:id="@+id/value"
+              android:hint="@string/value_hint"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="5dp"/>
+    <Button android:id="@+id/btn_set_value"
+            android:text="@string/save_btn_label"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+</LinearLayout>
+
