@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 public final class IoUtils {
     public static final String UTF_8 = "UTF-8";
@@ -87,19 +89,34 @@ public final class IoUtils {
     /**
      * Recursively delete everything in {@code dir}.
      */
-    // TODO: this should specify paths as Strings rather than as Files
     public static void deleteContents(File dir) throws IOException {
-        File[] files = dir.listFiles();
-        if (files == null) {
+        if (!dir.isDirectory()) {
             throw new IllegalArgumentException("not a directory: " + dir);
         }
-        for (File file : files) {
-            if (file.isDirectory()) {
-                deleteContents(file);
+        final LinkedList<File> dirs = new LinkedList<File>();
+        dirs.add(dir);
+        final ArrayList<File> emptyDirs = new ArrayList<File>();
+        while (!dirs.isEmpty()) {
+            final File d = dirs.remove();
+            final File[] fs = d.listFiles();
+            for (File f : fs) {
+                if (f.isDirectory()) {
+                    dirs.add(f);
+                } else {
+                    deleteFileOrThrow(f);
+                }
             }
-            if (!file.delete()) {
-                throw new IOException("failed to delete file: " + file);
-            }
+            emptyDirs.add(d);
+        }
+        for (int i = emptyDirs.size() - 1; i >= 0; i--) {
+            final File d = emptyDirs.get(i);
+            deleteFileOrThrow(d);
+        }
+    }
+
+    public static void deleteFileOrThrow(File f) throws IOException {
+        if (f.exists() && !f.delete()) {
+            throw new IOException("failed to delete file: " + f);
         }
     }
 }
