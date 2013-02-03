@@ -121,8 +121,8 @@ public final class IoUtils {
     }
 
     public static void renameFileOrThrow(File src, File dst) throws IOException {
-        if (src.renameTo(dst)) {
-            throw new IOException("file not created " + dst);
+        if (!src.renameTo(dst)) {
+            throw new IOException("file not renamed " + src + " " + dst);
         }
     }
 }
