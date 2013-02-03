@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
             @Override
             public void afterTextChanged(Editable s) {
                 mHandler.removeCallbacks(mFetchRunnable);
-                mHandler.postDelayed(mFetchRunnable, 1000);
+                mHandler.postDelayed(mFetchRunnable, 500);
             }
         });
         mValueEdit = (EditText) findViewById(R.id.value);
