@@ -287,8 +287,16 @@ public final class DiskLruCache implements Closeable {
         }
     }
 
+    /**
+     * Copies a range of values from the source array.
+     *
+     * @param src source array
+     * @param start start index, inclusive
+     * @param end last index, exclusive
+     * @return a new array with the range of values copied
+     */
     private String[] copyOfRange(String[] src, int start, int end) {
-        final int count = end - start + 1;
+        final int count = end - start;
         final String[] dst = new String[count];
         System.arraycopy(src, start, dst, 0, count);
         return dst;
