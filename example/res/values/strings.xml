@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DiskLruCache Example</string>
+    <string name="loading">Loading...</string>
+    <string name="error">Error loading</string>
+    <string name="key_hint">Enter a key</string>
+    <string name="value_hint">Enter a value</string>
+    <string name="saved_msg">Saved %s</string>
+    <string name="save_error_msg">Error saving %s</string>
+    <string name="save_btn_label">Save</string>
+</resources>
