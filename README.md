@@ -1,4 +1,9 @@
-disk-lru-cache
-==============
+Android Cache Library
+=====================
 
-DiskLruCache for Android
+A general purpose utility library for caching resources for Android apps.
+
+Features
+--------
+
+* DiskCacheLru 2.0: A refactor of AOSP [DiskLruCache](http://developer.android.com/training/displaying-bitmaps/cache-bitmap.html)
