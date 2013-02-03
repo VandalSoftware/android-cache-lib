@@ -21,7 +21,8 @@
     <string name="error">Error loading</string>
     <string name="key_hint">Enter a key</string>
     <string name="value_hint">Enter a value</string>
-    <string name="saved_msg">Saved %s</string>
-    <string name="save_error_msg">Error saving %s</string>
+    <string name="saved_msg_fmt">Saved %s</string>
+    <string name="removed_msg_fmt">Removed %s</string>
+    <string name="save_error_msg_fmt">Error saving %s</string>
     <string name="save_btn_label">Save</string>
 </resources>

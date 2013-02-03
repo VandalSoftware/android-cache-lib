@@ -82,8 +82,8 @@ public class MainActivity extends Activity {
         mSetValueBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new CacheSaveTask().execute(mKeyEdit.getText().toString(),
-                        mValueEdit.getText().toString());
+                new CacheSaveTask().execute(new KeyValue(mKeyEdit.getText().toString(),
+                        mValueEdit.getText().toString()));
             }
         });
         new CacheLoadTask().execute();
@@ -106,32 +106,57 @@ public class MainActivity extends Activity {
         }
     }
 
-    private class CacheSaveTask extends AsyncTask<String, Void, String> {
+    private static class KeyValue {
+        public final String key;
+        public final String value;
+        public boolean hasErrors;
+
+        private KeyValue(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+
+    private class CacheSaveTask extends AsyncTask<KeyValue, Void, KeyValue> {
         @Override
-        protected void onPostExecute(String key) {
-            if (key != null) {
-                Toast.makeText(MainActivity.this, getString(R.string.saved_msg, key),
+        protected void onPostExecute(KeyValue kv) {
+            if (kv.hasErrors) {
+                Toast.makeText(MainActivity.this, getString(R.string.save_error_msg_fmt, kv.key),
                         Toast.LENGTH_SHORT).show();
-                mKeyEdit.setText(null);
-                mValueEdit.setText(null);
             } else {
-                Toast.makeText(MainActivity.this, getString(R.string.save_error_msg, key),
-                        Toast.LENGTH_SHORT).show();
+                if (TextUtils.isEmpty(kv.value)) {
+                    Toast.makeText(MainActivity.this, getString(R.string.removed_msg_fmt, kv.key),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, getString(R.string.saved_msg_fmt, kv.key),
+                            Toast.LENGTH_SHORT).show();
+                }
+                mKeyEdit.setText(null);
+                mKeyEdit.requestFocus();
+                mValueEdit.setText(null);
             }
         }
 
         @Override
-        protected String doInBackground(String... strings) {
-            String key = strings[0];
-            String value = strings[1];
+        protected KeyValue doInBackground(KeyValue... kvs) {
+            final KeyValue kv = kvs[0];
             try {
-                DiskLruCache.Editor e = mDiskCache.edit(key);
-                Streams.writeStringTo(e.newOutputStream(0), value);
-                e.commit();
-                mDiskCache.flush();
-                return key;
+                if (TextUtils.isEmpty(kv.value)) {
+                    mDiskCache.remove(kv.key);
+                } else {
+                    DiskLruCache.Editor e = mDiskCache.edit(kv.key);
+                    Streams.writeStringTo(e.newOutputStream(0), kv.value);
+                    e.commit();
+                }
+                return kv;
             } catch (IOException e) {
-                return null;
+                kv.hasErrors = true;
+                return kv;
+            } finally {
+                try {
+                    mDiskCache.flush();
+                } catch (IOException ignored) {
+                }
             }
         }
     }
