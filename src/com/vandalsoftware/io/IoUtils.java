@@ -119,4 +119,10 @@ public final class IoUtils {
             throw new IOException("failed to delete file: " + f);
         }
     }
+
+    public static void renameFileOrThrow(File src, File dst) throws IOException {
+        if (src.renameTo(dst)) {
+            throw new IOException("file not created " + dst);
+        }
+    }
 }

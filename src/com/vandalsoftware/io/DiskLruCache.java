@@ -204,10 +204,13 @@ public final class DiskLruCache implements Closeable {
         }
 
         // create a new empty cache
-        directory.mkdirs();
-        cache = new DiskLruCache(directory, appVersion, valueCount, maxSize);
-        cache.rebuildJournal();
-        return cache;
+        if (directory.mkdirs() || directory.exists()) {
+            cache = new DiskLruCache(directory, appVersion, valueCount, maxSize);
+            cache.rebuildJournal();
+            return cache;
+        } else {
+            throw new FileNotFoundException("directory not found " + directory);
+        }
     }
 
     private static boolean deleteIfExists(File file) throws IOException {
@@ -354,7 +357,7 @@ public final class DiskLruCache implements Closeable {
         }
 
         writer.close();
-        journalFileTmp.renameTo(journalFile);
+        IoUtils.renameFileOrThrow(journalFileTmp, journalFile);
         journalWriter = new BufferedWriter(new FileWriter(journalFile, true));
         redundantOpCount = 0;
     }
@@ -465,7 +468,7 @@ public final class DiskLruCache implements Closeable {
             if (success) {
                 if (dirty.exists()) {
                     File clean = entry.getCleanFile(i);
-                    dirty.renameTo(clean);
+                    IoUtils.renameFileOrThrow(dirty, clean);
                     long oldLength = entry.lengths[i];
                     long newLength = clean.length();
                     entry.lengths[i] = newLength;
