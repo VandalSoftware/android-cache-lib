@@ -20,9 +20,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class Streams {
@@ -221,5 +224,33 @@ public final class Streams {
             result.setLength(length - 1);
         }
         return result.toString();
+    }
+
+    /**
+     * Writes the string to the target OutputStream and closes the stream.
+     *
+     * @param outputStream the target output stream to write to
+     * @param s the String to write
+     * @throws IOException
+     */
+    public static void writeStringTo(OutputStream outputStream, String s) throws IOException {
+        Writer writer = null;
+        try {
+            writer = new OutputStreamWriter(outputStream, IoUtils.UTF_8);
+            writer.write(s);
+        } finally {
+            IoUtils.closeQuietly(writer);
+        }
+    }
+
+    /**
+     * Reads a String from the InputStream, closing it when finished.
+     *
+     * @param in the InputStream to read
+     * @return String read from the InputStream
+     * @throws IOException
+     */
+    public static String readStringFrom(InputStream in) throws IOException {
+        return readFully(new InputStreamReader(in, IoUtils.UTF_8));
     }
 }

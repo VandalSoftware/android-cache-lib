@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import com.vandalsoftware.io.DiskLruCache;
 import com.vandalsoftware.io.IoUtils;
+import com.vandalsoftware.io.Streams;
 
 import java.io.File;
 import java.io.IOException;
@@ -125,7 +126,7 @@ public class MainActivity extends Activity {
             String value = strings[1];
             try {
                 DiskLruCache.Editor e = mDiskCache.edit(key);
-                e.set(0, value);
+                Streams.writeStringTo(e.newOutputStream(0), value);
                 e.commit();
                 mDiskCache.flush();
                 return key;
@@ -156,7 +157,7 @@ public class MainActivity extends Activity {
             try {
                 s = mDiskCache.get(key);
                 if (s != null) {
-                    return s.getString(0);
+                    return Streams.readStringFrom(s.getInputStream(0));
                 } else {
                     return null;
                 }

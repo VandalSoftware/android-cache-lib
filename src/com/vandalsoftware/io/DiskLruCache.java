@@ -30,9 +30,7 @@ import java.io.FileWriter;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -215,10 +213,6 @@ public final class DiskLruCache implements Closeable {
 
     private static boolean deleteIfExists(File file) throws IOException {
         return file.exists() && file.delete();
-    }
-
-    private static String inputStreamToString(InputStream in) throws IOException {
-        return Streams.readFully(new InputStreamReader(in, IoUtils.UTF_8));
     }
 
     /**
@@ -616,13 +610,6 @@ public final class DiskLruCache implements Closeable {
             return ins[index];
         }
 
-        /**
-         * Returns the string value for {@code index}.
-         */
-        public String getString(int index) throws IOException {
-            return inputStreamToString(getInputStream(index));
-        }
-
         @Override
         public void close() {
             for (InputStream in : ins) {
@@ -654,19 +641,6 @@ public final class DiskLruCache implements Closeable {
                     throw new IllegalStateException();
                 }
                 return new FaultHidingOutputStream(new FileOutputStream(entry.getDirtyFile(index)));
-            }
-        }
-
-        /**
-         * Sets the value at {@code index} to {@code value}.
-         */
-        public void set(int index, String value) throws IOException {
-            Writer writer = null;
-            try {
-                writer = new OutputStreamWriter(newOutputStream(index), IoUtils.UTF_8);
-                writer.write(value);
-            } finally {
-                IoUtils.closeQuietly(writer);
             }
         }
 
