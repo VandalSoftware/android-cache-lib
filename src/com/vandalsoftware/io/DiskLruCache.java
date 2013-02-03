@@ -632,15 +632,15 @@ public final class DiskLruCache implements Closeable {
         /**
          * Returns a new unbuffered output stream to write the value at {@code index}. If the
          * underlying output stream encounters errors when writing to the filesystem, this edit will
-         * be aborted when {@link #commit} is called. The returned output stream does not throw
-         * IOExceptions.
+         * be aborted when {@link #commit} is called.
          */
         public OutputStream newOutputStream(int index) throws IOException {
             synchronized (DiskLruCache.this) {
                 if (entry.currentEditor != this) {
                     throw new IllegalStateException();
                 }
-                return new FaultHidingOutputStream(new FileOutputStream(entry.getDirtyFile(index)));
+                return new ErrorCatchingOutputStream(
+                        new FileOutputStream(entry.getDirtyFile(index)));
             }
         }
 
@@ -665,44 +665,48 @@ public final class DiskLruCache implements Closeable {
             completeEdit(this, false);
         }
 
-        private class FaultHidingOutputStream extends FilterOutputStream {
-            private FaultHidingOutputStream(OutputStream out) {
+        private class ErrorCatchingOutputStream extends FilterOutputStream {
+            private ErrorCatchingOutputStream(OutputStream out) {
                 super(out);
             }
 
             @Override
-            public void write(int oneByte) {
+            public void write(int oneByte) throws IOException {
                 try {
                     out.write(oneByte);
                 } catch (IOException e) {
                     hasErrors = true;
+                    throw e;
                 }
             }
 
             @Override
-            public void write(byte[] buffer, int offset, int length) {
+            public void write(byte[] buffer, int offset, int length) throws IOException {
                 try {
                     out.write(buffer, offset, length);
                 } catch (IOException e) {
                     hasErrors = true;
+                    throw e;
                 }
             }
 
             @Override
-            public void close() {
+            public void close() throws IOException {
                 try {
                     out.close();
                 } catch (IOException e) {
                     hasErrors = true;
+                    throw e;
                 }
             }
 
             @Override
-            public void flush() {
+            public void flush() throws IOException {
                 try {
                     out.flush();
                 } catch (IOException e) {
                     hasErrors = true;
+                    throw e;
                 }
             }
         }
