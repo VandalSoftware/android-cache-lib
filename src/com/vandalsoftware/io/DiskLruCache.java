@@ -643,30 +643,6 @@ public final class DiskLruCache implements Closeable {
         }
 
         /**
-         * Returns an unbuffered input stream to read the last committed value, or null if no value
-         * has been committed.
-         */
-        public InputStream newInputStream(int index) throws IOException {
-            synchronized (DiskLruCache.this) {
-                if (entry.currentEditor != this) {
-                    throw new IllegalStateException();
-                }
-                if (!entry.readable) {
-                    return null;
-                }
-                return new FileInputStream(entry.getCleanFile(index));
-            }
-        }
-
-        /**
-         * Returns the last committed value as a string, or null if no value has been committed.
-         */
-        public String getString(int index) throws IOException {
-            InputStream in = newInputStream(index);
-            return in != null ? inputStreamToString(in) : null;
-        }
-
-        /**
          * Returns a new unbuffered output stream to write the value at {@code index}. If the
          * underlying output stream encounters errors when writing to the filesystem, this edit will
          * be aborted when {@link #commit} is called. The returned output stream does not throw
