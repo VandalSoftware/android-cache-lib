@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,6 +39,7 @@ import java.io.IOException;
  * @author Jonathan Le
  */
 public class MainActivity extends Activity {
+    private static final String TAG = "Example";
     private DiskLruCache mDiskCache;
     private EditText mKeyEdit;
     private EditText mValueEdit;
@@ -216,6 +218,7 @@ public class MainActivity extends Activity {
             try {
                 return DiskLruCache.open(dir, 1, 1, 5 * 1024);
             } catch (IOException e) {
+                Log.w(TAG, "open", e);
                 return null;
             }
         }
