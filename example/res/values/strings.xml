@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2013 Jonathan Le
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
 <resources>
-    <string name="app_name">DiskLruCache Example</string>
+    <string name="app_name">CacheLib Example</string>
     <string name="loading">Loading...</string>
     <string name="error">Error loading</string>
     <string name="key_hint">Enter a key</string>
     <string name="value_hint">Enter a value</string>
-    <string name="saved_msg">Saved %s</string>
-    <string name="save_error_msg">Error saving %s</string>
+    <string name="saved_msg_fmt">Saved %s</string>
+    <string name="removed_msg_fmt">Removed %s</string>
+    <string name="save_error_msg_fmt">Error saving %s</string>
     <string name="save_btn_label">Save</string>
 </resources>

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 Jonathan Le
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package com.vandalsoftware;
 
 import android.app.Activity;
@@ -7,17 +23,23 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.vandalsoftware.io.DiskLruCache;
 import com.vandalsoftware.io.IoUtils;
+import com.vandalsoftware.io.Streams;
 
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * @author Jonathan Le
+ */
 public class MainActivity extends Activity {
+    private static final String TAG = "Example";
     private DiskLruCache mDiskCache;
     private EditText mKeyEdit;
     private EditText mValueEdit;
@@ -62,8 +84,8 @@ public class MainActivity extends Activity {
         mSetValueBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new CacheSaveTask().execute(mKeyEdit.getText().toString(),
-                        mValueEdit.getText().toString());
+                new CacheSaveTask().execute(new KeyValue(mKeyEdit.getText().toString(),
+                        mValueEdit.getText().toString()));
             }
         });
         new CacheLoadTask().execute();
@@ -86,32 +108,57 @@ public class MainActivity extends Activity {
         }
     }
 
-    private class CacheSaveTask extends AsyncTask<String, Void, String> {
+    private static class KeyValue {
+        public final String key;
+        public final String value;
+        public boolean hasErrors;
+
+        private KeyValue(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+
+    private class CacheSaveTask extends AsyncTask<KeyValue, Void, KeyValue> {
         @Override
-        protected void onPostExecute(String key) {
-            if (key != null) {
-                Toast.makeText(MainActivity.this, getString(R.string.saved_msg, key),
+        protected void onPostExecute(KeyValue kv) {
+            if (kv.hasErrors) {
+                Toast.makeText(MainActivity.this, getString(R.string.save_error_msg_fmt, kv.key),
                         Toast.LENGTH_SHORT).show();
-                mKeyEdit.setText(null);
-                mValueEdit.setText(null);
             } else {
-                Toast.makeText(MainActivity.this, getString(R.string.save_error_msg, key),
-                        Toast.LENGTH_SHORT).show();
+                if (TextUtils.isEmpty(kv.value)) {
+                    Toast.makeText(MainActivity.this, getString(R.string.removed_msg_fmt, kv.key),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, getString(R.string.saved_msg_fmt, kv.key),
+                            Toast.LENGTH_SHORT).show();
+                }
+                mKeyEdit.setText(null);
+                mKeyEdit.requestFocus();
+                mValueEdit.setText(null);
             }
         }
 
         @Override
-        protected String doInBackground(String... strings) {
-            String key = strings[0];
-            String value = strings[1];
+        protected KeyValue doInBackground(KeyValue... kvs) {
+            final KeyValue kv = kvs[0];
             try {
-                DiskLruCache.Editor e = mDiskCache.edit(key);
-                e.set(0, value);
-                e.commit();
-                mDiskCache.flush();
-                return key;
+                if (TextUtils.isEmpty(kv.value)) {
+                    mDiskCache.remove(kv.key);
+                } else {
+                    DiskLruCache.Editor e = mDiskCache.edit(kv.key);
+                    Streams.writeStringTo(e.newOutputStream(0), kv.value);
+                    e.commit();
+                }
+                return kv;
             } catch (IOException e) {
-                return null;
+                kv.hasErrors = true;
+                return kv;
+            } finally {
+                try {
+                    mDiskCache.flush();
+                } catch (IOException ignored) {
+                }
             }
         }
     }
@@ -137,7 +184,7 @@ public class MainActivity extends Activity {
             try {
                 s = mDiskCache.get(key);
                 if (s != null) {
-                    return s.getString(0);
+                    return Streams.readStringFrom(s.getInputStream(0));
                 } else {
                     return null;
                 }
@@ -171,6 +218,7 @@ public class MainActivity extends Activity {
             try {
                 return DiskLruCache.open(dir, 1, 1, 5 * 1024);
             } catch (IOException e) {
+                Log.w(TAG, "open", e);
                 return null;
             }
         }
