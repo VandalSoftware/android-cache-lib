@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Jonathan Le
+ * Copyright (C) 2012 Vandal Software
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import java.io.IOException;
 /**
  * @author Jonathan Le
  */
-public class MainActivity extends Activity {
+public class SetValueActivity extends Activity {
     private static final String TAG = "Example";
     private DiskLruCache mDiskCache;
     private EditText mKeyEdit;
@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.set_value);
         mKeyEdit = (EditText) findViewById(R.id.key);
         mKeyEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -123,14 +123,14 @@ public class MainActivity extends Activity {
         @Override
         protected void onPostExecute(KeyValue kv) {
             if (kv.hasErrors) {
-                Toast.makeText(MainActivity.this, getString(R.string.save_error_msg_fmt, kv.key),
+                Toast.makeText(SetValueActivity.this, getString(R.string.save_error_msg_fmt, kv.key),
                         Toast.LENGTH_SHORT).show();
             } else {
                 if (TextUtils.isEmpty(kv.value)) {
-                    Toast.makeText(MainActivity.this, getString(R.string.removed_msg_fmt, kv.key),
+                    Toast.makeText(SetValueActivity.this, getString(R.string.removed_msg_fmt, kv.key),
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MainActivity.this, getString(R.string.saved_msg_fmt, kv.key),
+                    Toast.makeText(SetValueActivity.this, getString(R.string.saved_msg_fmt, kv.key),
                             Toast.LENGTH_SHORT).show();
                 }
                 mKeyEdit.setText(null);
@@ -207,7 +207,7 @@ public class MainActivity extends Activity {
             if (diskLruCache != null) {
                 setEnabled(true);
             } else {
-                Toast.makeText(MainActivity.this, R.string.error, Toast.LENGTH_LONG).show();
+                Toast.makeText(SetValueActivity.this, R.string.error, Toast.LENGTH_LONG).show();
             }
             mDiskCache = diskLruCache;
         }

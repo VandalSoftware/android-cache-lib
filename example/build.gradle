@@ -1,0 +1,15 @@
+apply plugin: 'android'
+
+dependencies {
+    compile project(':cache-library')
+}
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion '17.0.0'
+
+    defaultConfig {
+        minSdkVersion 4
+        targetSdkVersion 17
+    }
+}
