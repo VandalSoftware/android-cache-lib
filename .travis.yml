@@ -1,2 +1,2 @@
-script: ./gradlew build
 language: java
+script: ./gradlew build
