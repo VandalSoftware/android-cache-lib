@@ -99,11 +99,13 @@ public final class IoUtils {
         while (!dirs.isEmpty()) {
             final File d = dirs.remove();
             final File[] fs = d.listFiles();
-            for (File f : fs) {
-                if (f.isDirectory()) {
-                    dirs.add(f);
-                } else {
-                    deleteFileOrThrow(f);
+            if (fs != null) {
+                for (File f : fs) {
+                    if (f.isDirectory()) {
+                        dirs.add(f);
+                    } else {
+                        deleteFileOrThrow(f);
+                    }
                 }
             }
             emptyDirs.add(d);
