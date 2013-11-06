@@ -5,11 +5,11 @@ subprojects {
         }
 
         dependencies {
-            classpath 'com.android.tools.build:gradle:0.4.2'
+            classpath 'com.android.tools.build:gradle:0.6.+'
         }
     }
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.6'
+    gradleVersion = '1.8'
 }
