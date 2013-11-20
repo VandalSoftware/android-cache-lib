@@ -90,7 +90,7 @@ public final class IoUtils {
      * Recursively delete everything in {@code dir}.
      */
     public static void deleteContents(File dir) throws IOException {
-        if (!dir.isDirectory()) {
+        if (dir.exists() && !dir.isDirectory()) {
             throw new IllegalArgumentException("not a directory: " + dir);
         }
         final LinkedList<File> dirs = new LinkedList<File>();
