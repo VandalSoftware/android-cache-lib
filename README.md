@@ -3,6 +3,19 @@ Android Cache Library
 
 A general purpose utility library for caching resources for Android apps.
 
+Installation
+------------
+
+**build.gradle**
+
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+	  compile 'com.vandalsoftware.android:cache-library:1.0.+@aar'
+	}
+
 Features
 --------
 
